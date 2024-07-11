@@ -1,13 +1,15 @@
+from datetime import datetime
 from pathlib import Path
 import pandas as pd 
+from datafeeds_reports.utils import write_output_to_csv, discover_file, clean_processed_files
 
 
-FILE_PATTERN = '*MonthEndProcessing_BeneficiaryPercentage.csv'
+FILE_PATTERN = 'Sheet*MonthEndProcessing_BeneficiaryPercentage.csv'
 BENEFFTYPE_MIN_COUNT = {
     'Conting. Benef (Revocable)': 4,
     'Conting. Benef (Irrevocable)': 4,
     'Revocable': 10,
-    'Beneficiary': 10
+    'Beneficiary': 10,
 }
 
 
@@ -29,9 +31,9 @@ def flag_errors_in_data(df: pd.DataFrame) -> pd.DataFrame:
     df['Audit'] = [[] for _ in range(len(df))]
     for col in BENEFFTYPE_MIN_COUNT.keys(): 
         col_max_count = BENEFFTYPE_MIN_COUNT.get(col)
-        fltr = df[col] > col_max_count
+        fltr = df[col] >= col_max_count
         df.loc[fltr, 'Error'] = True 
-        df.loc[fltr]['Audit'].apply(lambda error: error.append(f'{col} more than {col_max_count}'))
+        df.loc[fltr]['Audit'].apply(lambda error: error.append(f'{col} more than or equal to {col_max_count}'))
     
     # if perecentage more than 100
     fltr = df['percentage_sum'] > 100
@@ -42,35 +44,29 @@ def flag_errors_in_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def formating_output(df: pd.DataFrame) -> pd.DataFrame:
     df['Audit'] = df['Audit'].apply(lambda errors: ';'.join(errors) if errors else '')
+
+    # filter only those with errors
+    df = df[df['Error'] == True]
     return df
 
 
-def write_output(df: pd.DataFrame, filename: Path) -> None:
-    ...
-
-
-def discover_file(search_path: Path, file_pattern: str) -> Path:
-    # Return first most recent file or raise exception
-    for f in sorted(search_path.glob(file_pattern), key=lambda f: f.stat().st_birthtime, reverse=True):
-        # validate file matches?
-        return f
-    raise FileNotFoundError(f'No file with this pattern ("{file_pattern}") was found. Try adding a "*" to the pattern.')
-
-
-def clean_processed_files(rename: bool=True, remove: bool=False) -> bool:
-    ...
-
-
-def main(): 
-    file = discover_file(search_path=SEARCH_PATH, file_pattern=FILE_PATTERN)
+def run_report(file_search_path: Path, file_pattern: str, final_output_filename: Path) -> None:
+    file = discover_file(search_path=file_search_path, file_pattern=file_pattern)
     df = read_and_filter_data(filepath=file)
     df = flag_errors_in_data(df=df)
     df = formating_output(df=df)
-    df.to_csv(output_file_name)
-    print(df)
+    finished_writing = write_output_to_csv(df=df, filename=final_output_filename)
+    if finished_writing:
+        clean_processed_files(filepath=file, rename=True, remove=False)
+
+
+def main(): 
+    SEARCH_PATH = Path(__file__).parents[2] / 'data'
+    OUTPUT_PATH = Path(__file__).parents[2] / 'output'
+    today = datetime.today().strftime(r'%Y%m%d')
+    output_file_name = OUTPUT_PATH / f'{today}_{Path(__file__).stem}_output.csv'
+    run_report(file_search_path=SEARCH_PATH, file_pattern=FILE_PATTERN, final_output_filename=output_file_name)
 
 
 if __name__ == '__main__':
-    SEARCH_PATH = Path(__file__).parents[0] / 'data'
-    output_file_name = SEARCH_PATH / 'output.csv'
     main()
