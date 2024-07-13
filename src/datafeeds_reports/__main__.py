@@ -1,6 +1,9 @@
+from datafeeds_reports import cli
+
+
 def main():
-    print('datafeeds reports app')
-    pass
+    cli.run_reports()
+
 
 if __name__ == '__main__':
     main()

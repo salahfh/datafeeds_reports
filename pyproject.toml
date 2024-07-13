@@ -11,7 +11,8 @@ license = {file = "LICENSE"}
 dependencies = [
     'pandas',
     'numpy',
+    'click',
 ]
 
 [project.scripts]
-datafeeds = "datafeeds_reports.__main__:main"
+datafeeds_reports = "datafeeds_reports.__main__:main"

@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 import pandas as pd 
-from datafeeds_reports.utils import write_output_to_csv, discover_file, clean_processed_files
+from datafeeds_reports.utils import write_output_to_csv, discover_file, clean_processed_file
 
 
 FILE_PATTERN = 'Sheet*MonthEndProcessing_BeneficiaryPercentage.csv'
@@ -47,7 +47,18 @@ def formating_output(df: pd.DataFrame) -> pd.DataFrame:
     return df[header]
 
 
-def run_report(file_search_path: Path, file_pattern: str, final_output_filename: Path) -> None:
+def run_report(input_file: Path, output_file: Path, **kwargs):
+    df_raw = pd.read_csv(input_file)
+    df = read_and_filter_data(df_raw=df_raw)
+    df = flag_errors_in_data(df=df)
+    df = merge_into_orignal_data(df=df, df_raw=df_raw)
+    df = formating_output(df=df)
+    finished_writing = write_output_to_csv(df=df, filename=output_file)
+    return finished_writing
+
+
+def run_report2(file_search_path: Path, file_pattern: str, final_output_filename: Path) -> None:
+    # Delete after debugging.
     file = discover_file(search_path=file_search_path, file_pattern=file_pattern)
     df_raw = pd.read_csv(file)
     df = read_and_filter_data(df_raw=df_raw)
@@ -56,7 +67,7 @@ def run_report(file_search_path: Path, file_pattern: str, final_output_filename:
     df = formating_output(df=df)
     finished_writing = write_output_to_csv(df=df, filename=final_output_filename)
     if finished_writing:
-        clean_processed_files(filepath=file, rename=False, remove=False)
+        clean_processed_file(filepath=file, rename=False, remove=False)
 
 
 def main(): 
@@ -64,7 +75,7 @@ def main():
     OUTPUT_PATH = Path(__file__).parents[2] / 'output'
     today = datetime.today().strftime(r'%Y%m%d')
     output_file_name = OUTPUT_PATH / f'{today}_{Path(__file__).stem}_output.csv'
-    run_report(file_search_path=SEARCH_PATH, file_pattern=FILE_PATTERN, final_output_filename=output_file_name)
+    run_report2(file_search_path=SEARCH_PATH, file_pattern=FILE_PATTERN, final_output_filename=output_file_name)
 
 
 if __name__ == '__main__':
