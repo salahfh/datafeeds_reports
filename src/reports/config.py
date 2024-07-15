@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import Callable
 from pathlib import Path
 from dataclasses import dataclass
-from datafeeds_reports import monthly_beneficiary_cleanup_report 
-from datafeeds_reports import monthly_test_report
+from reports import monthly_beneficiary_cleanup_report 
+from reports import monthly_test_report
 
 
 @dataclass

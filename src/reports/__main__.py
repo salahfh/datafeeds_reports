@@ -1,4 +1,4 @@
-from datafeeds_reports import cli
+from reports import cli
 
 
 def main():

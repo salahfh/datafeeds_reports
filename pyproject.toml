@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "datafeeds_reports"
+name = "reports"
 description = "DataFeeds reports script."
 version = "0.0.1"
 authors = [ {name = "Salah Eddine Saoud", email = "salah.saoud@financialhorizons.ca"} ]
@@ -15,4 +15,4 @@ dependencies = [
 ]
 
 [project.scripts]
-datafeeds_reports = "datafeeds_reports.__main__:main"
+reports = "reports.__main__:main"

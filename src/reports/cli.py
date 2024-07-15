@@ -2,9 +2,9 @@ from datetime import datetime
 import re
 from pathlib import Path
 import click
-from datafeeds_reports.__init__ import config
-from datafeeds_reports.config import FileTypeReport
-from datafeeds_reports.utils import ProcessUserChoices, clean_processed_file
+from reports.__init__ import config
+from reports.config import FileTypeReport
+from reports.utils import ProcessUserChoices, clean_processed_file
 
 
 # if pattern match add return avaliable reports
