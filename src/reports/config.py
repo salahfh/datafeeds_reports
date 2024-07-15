@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime
 from typing import Callable
 from pathlib import Path
@@ -16,15 +17,20 @@ class FileTypeReport:
         return mod.__name__.split('.')[-1]
 
     def __post_init__(self):
+        # Make sure new reports have the same run_report function
         for report in self.reports:
             assert hasattr(report, 'run_report'), f'{report} do not have a "run_report" function.'
+            module_run_report_signature = inspect.getfullargspec(report.run_report).args 
+            expected_run_report_signature = inspect.getfullargspec(monthly_beneficiary_cleanup_report.run_report).args 
+            assert module_run_report_signature == expected_run_report_signature,\
+                  f'{report} ({module_run_report_signature}) The run_report signature must match with the "monthly_beneficiary_cleanup_report.run_report"'
 
 
 @dataclass
 class Configs:
     input_search_folder: Path = Path.home() / 'Datafeed_reports' / 'Input'
     output_search_folder: Path = Path.home() / 'Datafeed_reports' / 'Output'
-    output_filename_preffix: str = f"{datetime.now().strftime(r'%Y%m%d')}_"
+    output_filename_preffix: str = f"{datetime.now().strftime(r'%Y%m%d')}"
     available_report: list[FileTypeReport] = None
     rename_files_after_processing: bool = True
     remove_files_after_processing: bool = False
