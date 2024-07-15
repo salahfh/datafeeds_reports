@@ -10,9 +10,11 @@ A script to generate formated reports from different file sources.
 6. After installation completed. Run `reports` first time to create the folders structure.
 
 ## How to use the script
-1. Copy the exported CSV file in the input file.
+1. Copy the exported CSV file in the input folder.
 2. Run the command `reports` in a Powershell window.
 3. The report will be saved in your output folder. 
+
+**Note**: the `input` and `output` folders are created in the user's home directory under `C:\Users\[USERNAME]\Datafeed_reports`.
 
 
 [1]:"https://www.python.org/downloads/"
