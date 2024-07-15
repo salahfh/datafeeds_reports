@@ -24,7 +24,7 @@ class FileTypeReport:
 class Configs:
     input_search_folder: Path = Path.home() / 'Datafeed_reports' / 'Input'
     output_search_folder: Path = Path.home() / 'Datafeed_reports' / 'Output'
-    output_filename_preffix: str = f'{datetime.now().strftime(r'%Y%m%d')}_'
+    output_filename_preffix: str = f"{datetime.now().strftime(r'%Y%m%d')}_"
     available_report: list[FileTypeReport] = None
     rename_files_after_processing: bool = True
     remove_files_after_processing: bool = False
@@ -56,6 +56,7 @@ AVAILBLE_REPORTS = [
 
 if __name__ == '__main__':
     c = Configs()
+    
 
 
 
