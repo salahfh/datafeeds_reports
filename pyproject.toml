@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "reports"
 description = "DataFeeds reports script."
 version = "0.0.1"
-authors = [ {name = "Salah Eddine Saoud", email = "salah.saoud@financialhorizons.ca"} ]
+authors = [ {name = "Salah Eddine Saoud"} ]
 license = {file = "LICENSE"}
 dependencies = [
     'pandas',
