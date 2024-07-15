@@ -4,6 +4,7 @@ from typing import Callable
 from dataclasses import dataclass
 
 
+# CLI utility
 @dataclass
 class UserChoice:
     index: int
@@ -11,7 +12,6 @@ class UserChoice:
     choice_prompt: str
 
 
-# CLI utility
 class ProcessUserChoices:
     '''
     Tasks a list of objects and a formating function and return a choice selector.
@@ -58,21 +58,6 @@ class ProcessUserChoices:
                 continue
             else:
                 return self.choices.pop(int(choice_index)).obj
-
-
-
-def write_output_to_csv(df: pd.DataFrame, filename: Path) -> bool:
-    df.to_csv(filename)
-    return True
-
-
-def discover_file(search_path: Path, file_pattern: str) -> Path:
-    # Delete this code [TODO]
-    # Return first most recent file or raise exception
-    for f in sorted(search_path.glob(file_pattern), key=lambda f: f.stat().st_birthtime, reverse=True):
-        # validate file matches?
-        return f
-    raise FileNotFoundError(f'No file with this pattern ("{file_pattern}") was found in the folder "{search_path}".')
 
 
 def clean_processed_file(filepath: Path, rename: bool=True, remove: bool=False) -> bool:
