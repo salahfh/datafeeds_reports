@@ -25,7 +25,7 @@ def discover_files(search_path: Path=config.input_search_folder) -> dict[str: li
     for item in search_path.rglob('*'):
         if item.is_file():
             if already_parsed_file(item):
-                print('- SKIP: file already processed.', item)
+                print('- SKIP: file already processed.', item.stem)
                 continue
             folder_structure[item.parents[0].stem].append(item)
     return folder_structure 
@@ -48,12 +48,10 @@ def determine_report_type(folder_structure: dict[str, list[Path]],
     return report_with_corresponding_files
 
 
-def select_report(item: list[ReportAndItsFiles]) -> FileTypeReport:
+def select_report(reports: list[FileTypeReport], files: list[Path]) -> FileTypeReport:
     '''
     For files that accepts multiple report types. Offer option to select report for given file.
     '''
-    reports = item.report
-    files = item.files
     if len(reports.reports) == 1:
         report = reports.reports[0]
     elif len(reports.reports) > 1:
@@ -65,12 +63,12 @@ def select_report(item: list[ReportAndItsFiles]) -> FileTypeReport:
 
 def process_reports(valid_reports: list[ReportAndItsFiles]) -> bool:
     for item in valid_reports:
-        report = select_report(item)
         files = item.files
+        report = select_report(reports=item.report, files=files)
         report_name = FileTypeReport.get_report_name(report)
         output_filepath = config.output_search_folder / f"{config.output_filename_preffix}_{report_name}.csv"
 
-        print(f'- Running report for "{report_name}" on file: {[file.stem for file in item.files]}')
+        print(f'- Running report for "{report_name}" on file(s): {[file.stem for file in item.files]}')
         report.run_report(input_files=files, output_file=output_filepath)
 
         for file in item.files:

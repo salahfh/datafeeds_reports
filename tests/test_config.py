@@ -107,7 +107,7 @@ def test_report_with_multiple_files_and_some_already_parsed(config):
     assert sorted(reports_with_files[0].files) == sorted(filter(is_not_parsed_fltr, created_files))
 
 
-def test_report_with_multiple_possible_matches(config):
+def test_filename_pattern_shared_between_multiple_reports(config):
     created_files = create_files(folder=config.input_search_folder, 
                                  filenames=['Sheet_2_FirstdayProcessing_BeneficiaryPercentage.csv',
                                             'Parsed_Sheet_3_FirstdayProcessing_BeneficiaryPercentage.csv',
@@ -116,13 +116,30 @@ def test_report_with_multiple_possible_matches(config):
     reports_with_files = determine_report_type(folder_structure=files, available_reports=(TWO_FILES_TEST_REPORT, ONE_FILE_TEST_REPORT)) 
     assert len(reports_with_files) == 2
 
-def test_report_with_multiple_files_inside_folder():
-    assert False
+
+def test_report_with_multiple_files_inside_folder(config):
+    created_files = create_files(folder=config.input_search_folder / 'folder', 
+                                 filenames=['Sheet_2_FirstdayProcessing_BeneficiaryPercentage.csv',
+                                            'Parsed_Sheet_3_FirstdayProcessing_BeneficiaryPercentage.csv',
+                                            'Sheet_1_MonthEndProcessing_BeneficiaryPercentage.csv',])
+    files = discover_files(config.input_search_folder)
+    reports_with_files = determine_report_type(folder_structure=files, available_reports=(TWO_FILES_TEST_REPORT,)) 
+    assert len(reports_with_files) == 1
+    assert sorted(reports_with_files[0].files) == sorted(filter(is_not_parsed_fltr, created_files))
 
 
-def test_filename_pattern_shared_between_multiple_reports():
-    assert False
+def test_report_with_multiple_files_but_not_placed_in_same_folder(config):
+    _ = create_files(folder=config.input_search_folder / 'folder', 
+                                 filenames=['Sheet_2_FirstdayProcessing_BeneficiaryPercentage.csv'])
+    _ = create_files(folder=config.input_search_folder,  
+                                 filenames=[ 'Sheet_1_MonthEndProcessing_BeneficiaryPercentage.csv'])
+    files = discover_files(config.input_search_folder)
+    reports_with_files = determine_report_type(folder_structure=files, available_reports=(TWO_FILES_TEST_REPORT,)) 
+    assert len(reports_with_files) == 0
 
 
-def test_invalid_filename_pattern():
-    assert False
+def test_report_with_invalid_filename_pattern(config):
+    _ = create_files(folder=config.input_search_folder, filenames=['first.csv', 'second.csv', 'third.txt'])
+    files = discover_files(config.input_search_folder)
+    reports_with_files = determine_report_type(folder_structure=files, available_reports=(TWO_FILES_TEST_REPORT, ONE_FILE_TEST_REPORT)) 
+    assert len(reports_with_files) == 0
