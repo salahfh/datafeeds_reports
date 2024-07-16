@@ -1,3 +1,4 @@
+from pprint import pprint
 from collections import defaultdict, namedtuple
 import re
 from pathlib import Path
@@ -16,28 +17,15 @@ ReportAndItsFiles = namedtuple('ReportAndItsFiles', 'report files')
 
 
 def already_parsed_file(file: Path) -> bool:
-    print('- SKIP: file already processed.', file.stem)
     return file.stem.startswith('Parsed')
 
 
-# discover the files
-def search_folder(folder_path: Path) -> list[Path]:
-    files = []
-    for file in folder_path.glob('*'):
-        if already_parsed_file(file):
-            continue
-        files.append(file)
-    return files
-
-
-# Only one level of nesting of dictories.
 def discover_files(search_path: Path=config.input_search_folder) -> dict[str: list[Path]]:
     folder_structure = defaultdict(list)
-    for item in search_path.glob('*'):
-        if item.is_dir():
-            folder_structure[item.stem].append(search_folder(item))
-        elif item.is_file():
+    for item in search_path.rglob('*'):
+        if item.is_file():
             if already_parsed_file(item):
+                print('- SKIP: file already processed.', item)
                 continue
             folder_structure[item.parents[0].stem].append(item)
     return folder_structure 
