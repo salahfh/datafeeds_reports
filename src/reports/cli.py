@@ -55,7 +55,7 @@ def select_report(reports: list[FileTypeReport], files: list[Path]) -> FileTypeR
         report = reports.reports[0]
     elif len(reports.reports) > 1:
         print("Select which report to run for the file(s): ", [file.stem for file in files])
-        report = ProcessUserChoices(reports,
+        report = ProcessUserChoices(reports.reports,
                             choice_prompt_func=lambda x: FileTypeReport.get_report_name(x)).get_user_choice()
     return report
 

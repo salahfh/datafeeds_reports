@@ -4,6 +4,7 @@ from typing import Callable
 from pathlib import Path
 from dataclasses import dataclass
 from reports import monthly_beneficiary_cleanup_report 
+from reports import monthly_beneficiary_cleanup_report as monthly_beneficiary_cleanup_report2
 
 
 @dataclass
@@ -55,6 +56,7 @@ AVAILBLE_REPORTS = [
         filename_patterns=['Sheet.*MonthEndProcessing_BeneficiaryPercentage'],
         reports=[
             monthly_beneficiary_cleanup_report,
+            monthly_beneficiary_cleanup_report2
             ]
     )
 ]
