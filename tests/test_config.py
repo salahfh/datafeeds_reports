@@ -3,6 +3,7 @@ import shutil
 import pytest
 from reports.config import FileTypeReport, Configs
 from reports import monthly_test_report
+from reports import monthly_test_report as monthly_test_report2
 from reports.cli import discover_files, determine_report_type, select_report, ReportAndItsFiles
 
 
@@ -15,6 +16,12 @@ TWO_FILES_TEST_REPORT = FileTypeReport(
     filename_patterns=['Sheet_.*_MonthEndProcessing_BeneficiaryPercentage',
                         'Sheet_.*_FirstdayProcessing_BeneficiaryPercentage'],
     reports=[monthly_test_report],
+    )
+
+ONE_FILE_MULTIPLE_TEST_REPORT = FileTypeReport(
+    filename_patterns=['Sheet_.*_MonthEndProcessing_BeneficiaryPercentage'],
+    reports=[monthly_test_report,
+             monthly_test_report2],
     )
 
 
@@ -115,6 +122,14 @@ def test_filename_pattern_shared_between_multiple_reports(config):
     files = discover_files(config.input_search_folder)
     reports_with_files = determine_report_type(folder_structure=files, available_reports=(TWO_FILES_TEST_REPORT, ONE_FILE_TEST_REPORT)) 
     assert len(reports_with_files) == 2
+
+
+def test_filename_pattern_with_multiple_reports(config):
+    created_files = create_files(folder=config.input_search_folder, 
+                                 filenames=['Sheet_1_MonthEndProcessing_BeneficiaryPercentage.csv',])
+    files = discover_files(config.input_search_folder)
+    reports_with_files = determine_report_type(folder_structure=files, available_reports=(ONE_FILE_MULTIPLE_TEST_REPORT, ))
+    assert len(reports_with_files) == 1
 
 
 def test_report_with_multiple_files_inside_folder(config):
