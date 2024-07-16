@@ -3,7 +3,6 @@ import pandas as pd
 from reports.common import write_output_to_csv
 
 
-FILE_PATTERN = 'Sheet*MonthEndProcessing_BeneficiaryPercentage.csv'
 BENEFFTYPE_MIN_COUNT = {
     'Conting. Benef (Revocable)': 4,
     'Conting. Benef (Irrevocable)': 4,
@@ -46,7 +45,8 @@ def formating_output(df: pd.DataFrame) -> pd.DataFrame:
     return df[header]
 
 
-def run_report(input_file: Path, output_file: Path, **kwargs):
+def run_report(input_files: list[Path], output_file: Path, **kwargs):
+    input_file = input_files[0]
     df_raw = pd.read_csv(input_file)
     df = read_and_filter_data(df_raw=df_raw)
     df = flag_errors_in_data(df=df)

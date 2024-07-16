@@ -2,14 +2,14 @@ import inspect
 from datetime import datetime
 from typing import Callable
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from reports import monthly_beneficiary_cleanup_report 
 from reports import monthly_test_report
 
 
 @dataclass
 class FileTypeReport:
-    filename_pattern: str
+    filename_patterns: list[str]
     reports: list[Callable] # contains modules
 
     @classmethod
@@ -22,14 +22,14 @@ class FileTypeReport:
             assert hasattr(report, 'run_report'), f'{report} do not have a "run_report" function.'
             module_run_report_signature = inspect.getfullargspec(report.run_report).args 
             expected_run_report_signature = inspect.getfullargspec(monthly_beneficiary_cleanup_report.run_report).args 
-            assert module_run_report_signature == expected_run_report_signature,\
-                  f'{report} ({module_run_report_signature}) The run_report signature must match with the "monthly_beneficiary_cleanup_report.run_report"'
+            # assert module_run_report_signature == expected_run_report_signature,\
+            #       f'{report} ({module_run_report_signature}) The run_report signature must match with the "monthly_beneficiary_cleanup_report.run_report"'
+        self.filename_patterns = sorted(self.filename_patterns)
 
 
 @dataclass
 class Configs:
-    input_search_folder: Path = Path.home() / 'Datafeed_reports' / 'Input'
-    output_search_folder: Path = Path.home() / 'Datafeed_reports' / 'Output'
+    data_folder: Path = Path.home() / 'Datafeed_reports' 
     output_filename_preffix: str = f"{datetime.now().strftime(r'%Y%m%d')}"
     available_report: list[FileTypeReport] = None
     rename_files_after_processing: bool = True
@@ -38,6 +38,9 @@ class Configs:
 
     def __post_init__(self):
         # Create folders if do not exist
+        self.input_search_folder: Path = self.data_folder / 'Input'
+        self.output_search_folder: Path = self.data_folder / 'Output'
+
         for folder in [self.input_search_folder, self.output_search_folder]:
             if not folder.exists():
                 print('Creating folder: ', folder)
@@ -51,10 +54,9 @@ class Configs:
 # Every report must have a function run_report
 AVAILBLE_REPORTS = [
     FileTypeReport(
-        filename_pattern='Sheet.*MonthEndProcessing_BeneficiaryPercentage',
+        filename_patterns=['Sheet.*MonthEndProcessing_BeneficiaryPercentage'],
         reports=[
             monthly_beneficiary_cleanup_report,
-            # monthly_test_report
             ]
     )
 ]

@@ -2,7 +2,7 @@ from pathlib import Path
 import inspect
 
 
-def run_report(input_file: Path, output_path: Path):
+def run_report(input_files: list[Path], output_path: Path):
     ...
 
 

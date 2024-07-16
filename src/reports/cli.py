@@ -1,3 +1,4 @@
+from collections import defaultdict, namedtuple
 import re
 from pathlib import Path
 import click
@@ -10,59 +11,92 @@ from reports.utils import ProcessUserChoices, clean_processed_file
 # offer an interactive list of choices when there's more than one report
 # Otherwise proceed automatically with the report
 
-def determine_report_type(file: Path) -> list[FileTypeReport]:
-    for report in config.available_report:
-        if re.match(report.filename_pattern, file.stem):
-            return report.reports
-    return []
+
+ReportAndItsFiles = namedtuple('ReportAndItsFiles', 'report files')
 
 
-already_parsed_file = lambda f: f.stem.startswith('Parsed')
+def already_parsed_file(file: Path) -> bool:
+    print('- SKIP: file already processed.', file.stem)
+    return file.stem.startswith('Parsed')
 
 
-def discover_files(search_path: Path=config.input_search_folder):
-    valid_files = []
-    for file in list(search_path.glob('*.csv')):
+# discover the files
+def search_folder(folder_path: Path) -> list[Path]:
+    files = []
+    for file in folder_path.glob('*'):
         if already_parsed_file(file):
-            print('- SKIP: file already processed.', file.stem)
             continue
-
-        reports = determine_report_type(file=file)
-        if reports:
-            valid_files.append((file, reports))
-        else:
-            print('- SKIP: Uncognized file format.', file.stem)
-    return valid_files
+        files.append(file)
+    return files
 
 
-def select_report_and_run(valid_files: list[(Path, FileTypeReport)]):
-    if valid_files:
-        print("Start Report Processing.\n")
-        for file, reports in valid_files:
-            if len(reports) == 1:
-                report_module = reports[0]
-            elif len(reports) > 1:
-                print("Select which report to run for the file: ", file.stem)
-                report_module = ProcessUserChoices(reports,
-                                    choice_prompt_func=lambda x: FileTypeReport.get_report_name(x)).get_user_choice()
+# Only one level of nesting of dictories.
+def discover_files(search_path: Path=config.input_search_folder) -> dict[str: list[Path]]:
+    folder_structure = defaultdict(list)
+    for item in search_path.glob('*'):
+        if item.is_dir():
+            folder_structure[item.stem].append(search_folder(item))
+        elif item.is_file():
+            if already_parsed_file(item):
+                continue
+            folder_structure[item.parents[0].stem].append(item)
+    return folder_structure 
 
-            report_name = FileTypeReport.get_report_name(report_module)
-            output_filepath = config.output_search_folder / f"{config.output_filename_preffix}_{report_name}.csv"
 
-            print(f'- Running report for "{report_name}" on file: {file.stem}')
-            report_module.run_report(input_file=file, output_file=output_filepath)
+def determine_report_type(folder_structure: dict[str, list[Path]],
+                          available_reports: list[FileTypeReport] = config.available_report
+                          ) -> list[ReportAndItsFiles]:
+    report_with_corresponding_files = []
+    for folder in folder_structure:
+        for report in available_reports:
+            files = sorted(folder_structure.get(folder))
+            for filename_pattern in report.filename_patterns:
+                matches = list(filter(re.compile(filename_pattern).match, [f.stem for f in files]))
+                if not len(matches):
+                    # filename don't match pattern
+                    break
+            else:
+                report_with_corresponding_files.append(ReportAndItsFiles(report, files=files))
+    return report_with_corresponding_files
 
+
+def select_report(item: list[ReportAndItsFiles]) -> FileTypeReport:
+    '''
+    For files that accepts multiple report types. Offer option to select report for given file.
+    '''
+    reports = item.report
+    files = item.files
+    if len(reports.reports) == 1:
+        report = reports.reports[0]
+    elif len(reports.reports) > 1:
+        print("Select which report to run for the file(s): ", [file.stem for file in files])
+        report = ProcessUserChoices(reports,
+                            choice_prompt_func=lambda x: FileTypeReport.get_report_name(x)).get_user_choice()
+    return report
+
+
+def process_reports(valid_reports: list[ReportAndItsFiles]) -> bool:
+    for item in valid_reports:
+        report = select_report(item)
+        files = item.files
+        report_name = FileTypeReport.get_report_name(report)
+        output_filepath = config.output_search_folder / f"{config.output_filename_preffix}_{report_name}.csv"
+
+        print(f'- Running report for "{report_name}" on file: {[file.stem for file in item.files]}')
+        report.run_report(input_files=files, output_file=output_filepath)
+
+        for file in item.files:
             clean_processed_file(filepath=file,
-                                  rename=config.rename_files_after_processing,
-                                  remove=config.remove_files_after_processing)
-        print("\nReport Finished Running")
-    return True
-        
+                            rename=config.rename_files_after_processing,
+                            remove=config.remove_files_after_processing)
+
 
 @click.command()
 def run_reports():
-    files = discover_files()
-    select_report_and_run(valid_files=files)
+    folder_structure = discover_files()
+    report_with_files = determine_report_type(folder_structure)
+    process_reports(report_with_files)
+
 
 if __name__ == '__main__':
     run_reports()
