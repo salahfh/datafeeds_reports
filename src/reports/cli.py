@@ -1,6 +1,5 @@
-from pprint import pprint
-from collections import defaultdict, namedtuple
 import re
+from collections import defaultdict, namedtuple
 from pathlib import Path
 import click
 from reports.__init__ import config

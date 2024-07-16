@@ -2,9 +2,8 @@ import inspect
 from datetime import datetime
 from typing import Callable
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from reports import monthly_beneficiary_cleanup_report 
-from reports import monthly_test_report
 
 
 @dataclass
@@ -21,10 +20,9 @@ class FileTypeReport:
         for report in self.reports:
             assert hasattr(report, 'run_report'), f'{report} do not have a "run_report" function.'
             module_run_report_signature = inspect.getfullargspec(report.run_report).args 
-            expected_run_report_signature = inspect.getfullargspec(monthly_beneficiary_cleanup_report.run_report).args 
+            expected_run_report_signature = ['input_files', 'output_path']
             # assert module_run_report_signature == expected_run_report_signature,\
             #       f'{report} ({module_run_report_signature}) The run_report signature must match with the "monthly_beneficiary_cleanup_report.run_report"'
-        self.filename_patterns = sorted(self.filename_patterns)
 
 
 @dataclass
