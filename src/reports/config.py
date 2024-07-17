@@ -32,6 +32,7 @@ class Configs:
     available_report: list[FileTypeReport] = None
     rename_files_after_processing: bool = True
     remove_files_after_processing: bool = False
+    repo_url: str = 'git+https://github.com/salahfh/datafeeds_reports'
 
 
     def __post_init__(self):

@@ -1,3 +1,4 @@
+import subprocess
 import re
 from collections import defaultdict, namedtuple
 from pathlib import Path
@@ -81,6 +82,11 @@ def run_reports():
     folder_structure = discover_files()
     report_with_files = determine_report_type(folder_structure)
     process_reports(report_with_files)
+
+
+@click.command()
+def update():
+    subprocess.run(["pip", "install", "-U", config.repo_url])
 
 
 if __name__ == '__main__':
