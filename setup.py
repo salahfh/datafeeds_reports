@@ -19,7 +19,7 @@ def create_pip_ini():
     Create pip.ini to fix the self-signed cerficates issue due environment.
     '''
     folder_location = Path(os.getenv('APPDATA')) / 'pip'
-    pip_ini = folder_location / 'pip.ini_2'
+    pip_ini = folder_location / 'pip.ini'
     if not pip_ini.exists():
         with open(pip_ini, 'w') as f:
             f.write(PIP_INI_CONFIG)
@@ -33,6 +33,8 @@ def install_package():
 if __name__ == '__main__':
     create_pip_ini()
     install_package()
+    input('Setup finished. press any key to continue ...')
+
 
 
 # Launch pip to install the package

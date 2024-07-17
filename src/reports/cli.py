@@ -1,4 +1,3 @@
-import subprocess
 import re
 from collections import defaultdict, namedtuple
 from pathlib import Path
@@ -84,9 +83,9 @@ def run_reports():
     process_reports(report_with_files)
 
 
-@click.command()
-def update():
-    subprocess.run(["pip", "install", "-U", config.repo_url])
+# @click.command()
+# def update():
+#     subprocess.run(["pip", "install", "-U", config.repo_url])
 
 
 if __name__ == '__main__':
