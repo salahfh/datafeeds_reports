@@ -95,6 +95,7 @@ def cli():
 @cli.command()
 def run():
     '''Run Reports'''
+    # Don't change this command without change the script.py file.
     run_reports()
 
 
@@ -102,7 +103,7 @@ def run():
 def clear():
     '''Remove all files in the input and output folders'''
     shutil.rmtree(config.data_folder)
-    click.echo('Input folder cleared.')
+    click.echo('Folders cleared.')
     config.__post_init__(quiet=True)
 
 
