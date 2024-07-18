@@ -1,8 +1,8 @@
-from reports.cli import run_reports
+from reports.cli import cli
 
 
 def main():
-    run_reports()
+    cli()
 
 
 if __name__ == '__main__':
