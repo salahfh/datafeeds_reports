@@ -6,7 +6,8 @@ from time import sleep
 # Requirement is to have python installed. 
 
 REPO_URL = 'git+https://github.com/salahfh/datafeeds_reports'
-PIP_INI_CONFIG  = '''
+PIP_INI_CONFIG  = \
+'''
 [global]
 trusted-host = pypi.python.org
                pypi.org
@@ -14,6 +15,12 @@ trusted-host = pypi.python.org
                raw.githubusercontent.com
                github.com
 '''
+BAT_FILE_CONTENT = \
+'''
+@reports run %*
+@pause
+'''
+
 
 def create_pip_ini():
     '''
@@ -31,12 +38,20 @@ def install_package():
     subprocess.run(["pip", "install", "-U", REPO_URL])
 
 
+def create_desktop_shortcut():
+    '''
+    Create a .bat file to run reports.
+    '''
+    username = os.getlogin()
+    file_location = Path(fr"C:\Users\{username}\OneDrive - Enterprise 365\Desktop") / 'Run Reports.bat'
+    with open(file_location, 'w') as f:
+        f.write(BAT_FILE_CONTENT)
+
+
 if __name__ == '__main__':
     create_pip_ini()
     install_package()
+    create_desktop_shortcut()
     print('\nSetup finished.')
     sleep(3)
 
-
-
-# Launch pip to install the package

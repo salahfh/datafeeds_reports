@@ -96,7 +96,6 @@ def cli():
 def run():
     '''Run Reports'''
     run_reports()
-    click.echo('Reports are ready.')
 
 
 @cli.command()
