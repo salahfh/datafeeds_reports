@@ -21,6 +21,7 @@ class ProcessUserChoices:
         self.objects = objects
         self.choice_prompt = choice_prompt_func
         self.choices = self.__generate_list_of_choices()
+        self.testing = False
 
     def validate_input(self):
         if len(self.objects) <= 0:
@@ -32,7 +33,7 @@ class ProcessUserChoices:
         for index, choice in enumerate(self.objects):
             choices.append(
                 UserChoice(
-                    index=index,
+                    index=index+1,
                     obj=choice,
                     choice_prompt=self.choice_prompt(choice)
                 )
@@ -48,15 +49,21 @@ class ProcessUserChoices:
             print(f'{choice.index}) {choice.choice_prompt}')
         while True: 
             try: 
-                choice_index = input('Enter the index of your choice to process -> ')
+                choice_index = int(input('Enter the index of your choice to process -> '))
+                if choice_index not in (choice.index for choice in self.choices):
+                    raise ValueError
+            except ValueError:
+                print('Please try again! ', end=' ')
+                if self.testing:
+                    # This only because I couldn't send CTRL+C via pytest
+                    raise NotImplementedError
+                else:
+                    continue
             except KeyboardInterrupt:
                 print('Bye!')
-                exit()
-            if int(choice_index) not in (choice.index for choice in self.choices):
-                print('Please try again! ', end=' ')
-                continue
+                exit(1)
             else:
-                return self.choices.pop(int(choice_index)).obj
+                return self.choices.pop(int(choice_index)-1).obj
 
 
 def clean_processed_file(filepath: Path, rename: bool=True, remove: bool=False) -> bool:
