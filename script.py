@@ -72,8 +72,14 @@ def initial_run_for_setup() -> int:
     return status.returncode
 
 
+def allow_bat_script_to_run_for_current_user() -> int:
+    subprocess.Popen(["powershell.exe",  "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUse"])
+    return 0
+
+
 if __name__ == '__main__':
     status_code = insure_pip_is_installed()
+    status_code += allow_bat_script_to_run_for_current_user()
     status_code += create_pip_ini()
     status_code += install_package()
     status_code += create_desktop_shortcut()
