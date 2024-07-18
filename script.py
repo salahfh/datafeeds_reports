@@ -34,7 +34,7 @@ BAT_FILE_CONTENT = \
 '''
 
 
-def insure_pip_is_installed() -> int:
+def ensure_pip_is_installed() -> int:
     status = subprocess.run(['py', '-m', 'ensurepip', '--upgrade'])
     return status.returncode
 
@@ -51,7 +51,7 @@ def create_pip_ini() -> int:
     return 0
 
 
-def install_package() -> int:
+def install_packages() -> int:
     status = subprocess.run(["pip", "install", "-U", REPO_URL])
     return status.returncode
 
@@ -67,7 +67,7 @@ def create_desktop_shortcut() -> int:
     return 0
 
 
-def initial_run_for_setup() -> int:
+def create_folder_structure() -> int:
     status = subprocess.run(["reports", "run"])
     return status.returncode
 
@@ -78,14 +78,18 @@ def allow_bat_script_to_run_for_current_user() -> int:
 
 
 if __name__ == '__main__':
-    status_code = insure_pip_is_installed()
-    status_code += allow_bat_script_to_run_for_current_user()
-    status_code += create_pip_ini()
-    status_code += install_package()
-    status_code += create_desktop_shortcut()
-    status_code += initial_run_for_setup()
+    for index, step in enumerate([
+        ensure_pip_is_installed,
+        create_pip_ini,
+        install_packages,
+        create_desktop_shortcut,
+        allow_bat_script_to_run_for_current_user,
+        create_folder_structure,
+            ]):
+        print(f'{bcolors.OKCYAN}{index+1}. {step.__name__.replace('_', ' ').title()} ...{bcolors.ENDC}')
+        status_code = step()
+        if status_code != 0:
+            print(f'\n{bcolors.FAIL}Setup step failed.{bcolors.ENDC}')
     if status_code == 0:
         print(f'\n{bcolors.OKGREEN}Setup finished.{bcolors.ENDC}')
-    else:
-        print(f'\n{bcolors.FAIL}Setup failed.{bcolors.ENDC}')
     input('Press any key to continue ...')
