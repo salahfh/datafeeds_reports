@@ -35,14 +35,15 @@ class Configs:
     repo_url: str = 'git+https://github.com/salahfh/datafeeds_reports'
 
 
-    def __post_init__(self):
+    def __post_init__(self, quiet=False):
         # Create folders if do not exist
         self.input_search_folder: Path = self.data_folder / 'Input'
         self.output_search_folder: Path = self.data_folder / 'Output'
 
         for folder in [self.input_search_folder, self.output_search_folder]:
             if not folder.exists():
-                print('Creating folder: ', folder)
+                if not quiet:
+                    print('Creating folder: ', folder)
                 folder.mkdir(parents=True)
         
         if self.available_report == None:

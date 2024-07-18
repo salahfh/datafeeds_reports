@@ -1,4 +1,6 @@
 import re
+import subprocess
+import shutil
 from collections import defaultdict, namedtuple
 from pathlib import Path
 import click
@@ -76,17 +78,37 @@ def process_reports(valid_reports: list[ReportAndItsFiles]) -> bool:
                             remove=config.remove_files_after_processing)
 
 
-@click.command()
 def run_reports():
     folder_structure = discover_files()
     report_with_files = determine_report_type(folder_structure)
     process_reports(report_with_files)
 
 
-# @click.command()
-# def update():
-#     subprocess.run(["pip", "install", "-U", config.repo_url])
+@click.group()
+def cli():
+    '''Utility to help generate reports for datafeeds.'''
+    pass
+
+
+@cli.command()
+def run():
+    '''Run Reports'''
+    run_reports()
+
+
+@cli.command()
+def clear():
+    '''Remove all files in the input and output folders'''
+    shutil.rmtree(config.data_folder)
+    click.echo('Input folder cleared.')
+    config.__post_init__(quiet=True)
+
+
+@cli.command()
+def update():
+    '''Update software'''
+    subprocess.run(["pip", "install", "-U", config.repo_url])
 
 
 if __name__ == '__main__':
-    run_reports()
+    cli()
