@@ -1,4 +1,6 @@
+import importlib.machinery
 import re
+import importlib.metadata
 import subprocess
 import shutil
 from collections import defaultdict, namedtuple
@@ -108,6 +110,12 @@ def clear():
 def update():
     '''Update software'''
     subprocess.run(["pip", "install", "-U", config.repo_url])
+
+
+@cli.command()
+def version():
+    '''Get version of the software'''
+    click.echo(importlib.metadata.version('reports'))
 
 
 if __name__ == '__main__':
